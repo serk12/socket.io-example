@@ -6,11 +6,14 @@ io.on('connection', function (socket) {
   console.log('connection', socket.id)
   socket.on('disconnect', function () {
     console.log('disconnection', socket.id)
+    socket.broadcast.emit('user_disconnect', socket.id)
   })
-  socket.on('update_position', function (pos) {
+
+  socket.on('update_position', function (pos,color) {
     pos.id = socket.id
-    socket.broadcast.emit('update_position', pos)
+    socket.broadcast.emit('update_position', pos, color)
   })
+  
 })
 
 console.log('server started on port', port)
