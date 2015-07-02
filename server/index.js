@@ -1,6 +1,5 @@
 var port = process.env.PORT || 9000
 var io = require('socket.io')(port)
-var Sprite = require('../utils/Sprite.js')
 var players = {}
 var carrots = {}
 make_carrots(carrots)
@@ -72,7 +71,7 @@ function make_carrots(carrots) {
 function collision(bunny, carrot) {
   var dist_x = bunny.x - carrot.x
   var dist_y = bunny.y - carrot.y
-  var sum_rad = 128/2 + 0.3*256/2
+  var sum_rad = 128/2 + 0.1*256/2
   return (dist_x*dist_x + dist_y*dist_y) < sum_rad*sum_rad
 }
 console.log('server started on port', port)

@@ -7,10 +7,10 @@ var stage = new PIXI.Container();
 	
 
 var bunny = new Sprite('bunny.png', null, 
-					  Math.random()*0xFFFFFF + 0xFF000000, stage, null)
-global.bunny = bunny.sprite
-bunny = bunny.sprite
+			 Math.random()*0xFFFFFF + 0xFF000000, stage, null)
 
+bunny = bunny.sprite
+global.bunny = bunny
 var otherBunnies = {}
 var carrots= {}
 var keyboard = new KeyboardJS()

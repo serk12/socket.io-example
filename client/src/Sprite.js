@@ -19,3 +19,4 @@ function Sprite(texture_s, pos, tint, stage, scale) {
 	if (stage) stage.addChild(scope.sprite)
 	if (scale) scope.sprite.scale.x = scope.sprite.scale.y = scale
 }
+
