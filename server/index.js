@@ -9,7 +9,7 @@ io.on('connection', function (socket) {
 	
 	for (var playerId in players) {
 		var playerInfo = players[playerId]
-		socket.emit('update_position', playerInfo)
+		socket.emit('update_position', playerInfo.pos, playerInfo.color, playerInfo.score, playerInfo.name)
 	}
 	
 	for (var carrotId in carrots) {
@@ -19,22 +19,24 @@ io.on('connection', function (socket) {
 	
 	socket.on('disconnect', function () {
 		console.log('disconnection', socket.id)
-		delete players[socket.id]
 		socket.broadcast.emit('user_disconnect', socket.id)
+		delete players[socket.id]
 	})
 	
-	socket.on('update_position', function (pos, color) {
+	socket.on('update_position', function (pos, color, score, name) {
 		pos.id = socket.id
 		if (players[socket.id]) {
 			players[socket.id].pos   = pos
 			players[socket.id].color = color
+			players[socket.id].score = score
+			players[socket.id].name  = name
 		}
 		else {
-			players[socket.id] = new info(pos, color)
+			players[socket.id] = new info(pos, color, score, name)
 		}
 		for (var carrotId in carrots) {
 			if (collision(pos,carrots[carrotId])) {
-				io.sockets.emit('pickup_carrot', carrotId)
+				io.sockets.emit('pickup_carrot', carrotId, socket.id)
 				delete carrots[carrotId]
 				--carrots.size;
 				if (!carrots.size) {
@@ -47,14 +49,21 @@ io.on('connection', function (socket) {
 				}
 			}
 		}
-		socket.broadcast.emit('update_position', pos, color)
 	})
 })
 
+setInterval(function() {
+  	for (var playerId in players) {
+		var playerInfo = players[playerId]
+		io.sockets.emit('update_position', playerInfo.pos, playerInfo.color, playerInfo.score, playerInfo.name)
+	}
+}, 50)
 
-function info(pos, color) {
+function info(pos, color, score, name) {
 	this.color = color
-	this.pos = pos
+	this.pos   = pos
+	this.score = score
+	this.name  = name
 }
 
 function pos(x,y) {
