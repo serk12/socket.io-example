@@ -2,23 +2,17 @@ var serverURL = 'localhost:9000'
 var socket = require('socket.io-client')(serverURL)
 
 var renderer = new PIXI.WebGLRenderer(800, 600);
-
 document.body.appendChild(renderer.view);
-
 var stage = new PIXI.Container();
+	
 
-var bunnyTexture = PIXI.Texture.fromImage('bunny.png');
-var bunny = new PIXI.Sprite(bunnyTexture);
-global.bunny = bunny
+var bunny = new Sprite('bunny.png', null, 
+					  Math.random()*0xFFFFFF + 0xFF000000, stage, null)
+global.bunny = bunny.sprite
+bunny = bunny.sprite
+
 var otherBunnies = {}
-
-bunny.position.x = Math.random() * 800
-bunny.position.y = Math.random() * 600
-bunny.anchor.set(0.5, 0.5)
-bunny.color = Math.random()*0xFFFFFF + 0xFF000000
-bunny.tint = bunny.color
-stage.addChild(bunny);
-
+var carrots= {}
 var keyboard = new KeyboardJS()
 
 animate();
@@ -36,35 +30,39 @@ function animate() {
 }
 
 socket.on('update_position', function (pos, color) {
-  var sprite = otherBunnies[pos.id]
-  if (!sprite) {
-    sprite = new PIXI.Sprite(bunnyTexture)
-    stage.addChild(sprite)
-    otherBunnies[pos.id] = sprite
-    sprite.anchor.set(0.5, 0.5)
-    sprite.tint = color
-  }
-  sprite.position.x = pos.x
-  sprite.position.y = pos.y
+	var sprite = otherBunnies[pos.id]
+	if (!sprite) {
+		otherBunnies[pos.id] = new Sprite('bunny.png', pos, color, stage, null).sprite
+	}
+	else {
+		sprite.position.x = pos.x
+		sprite.position.y = pos.y
+	}
 })
 
 socket.on('connect', function () {
-  console.log('connected')
-  socket.emit('update_position', bunny.position, bunny.color)
+	console.log('connected')
+	socket.emit('update_position', bunny.position, bunny.color)
 })
 
 socket.on('user_disconnect', function(id) {
-  stage.removeChild(otherBunnies[id])
+	if(otherBunnies[id]) {
+		stage.removeChild(otherBunnies[id])
+		delete otherBunnies[id]
+	}
 })
 
-function KeyboardJS () {
-  this.keys = [];
-  this.char = function(x) { return this.keys[x.charCodeAt(0)]; }
-  var scope = this;
-  document.addEventListener("keydown", function (evt) {
-  scope.keys[evt.keyCode] = true;
-  });
-  document.addEventListener("keyup", function (evt) {
-  scope.keys[evt.keyCode] = false;
-  });
-}
+socket.on('pickup_carrot', function(carrotId) {
+	if(carrots[carrotId]) {
+		stage.removeChild(carrots[carrotId])
+		delete carrots[carrotId]
+	}
+})
+
+socket.on('carrot', function(pos, carrotId) {
+	var carrot = carrots[carrotId]
+	if (!carrot) {
+		carrots[carrotId] = new Sprite('carrot.png', pos, null, stage, 0.1).sprite
+	}
+	
+})
